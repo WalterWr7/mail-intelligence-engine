@@ -1,0 +1,29 @@
+# --- 1. Datos y Modelos (Archivos pesados) ---
+# Ignorar tu dataset específico
+dataset_masivo_1ano.csv
+# Ignorar cualquier otro CSV por si acaso (opcional)
+*.csv
+
+# Ignorar el modelo entrenado (el cerebro)
+cerebro_priorizacion.joblib
+# Ignorar cualquier otro binario de joblib/pickle
+*.pkl
+*.joblib
+
+# --- 2. Archivos generados por CatBoost ---
+catboost_info/
+
+# --- 3. Basura de Python (Bytecode) ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- 4. Entornos Virtuales y Configuración ---
+# Si usas venv o env
+venv/
+env/
+.env
+
+# --- 5. Archivos de Sistema Operativo ---
+.DS_Store
+Thumbs.db
