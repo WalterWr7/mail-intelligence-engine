@@ -3,3 +3,7 @@ pywin32
 joblib
 catboost
 scikit-learn
+customtkinter
+matplotlib
+packaging
+pillow

@@ -98,8 +98,12 @@ def procesar_carpeta_recursiva(carpeta, lista_datos, ruta_actual, fecha_limite):
     
     try:
         items = carpeta.Items
-        items.Sort("[ReceivedTime]", True) # Más recientes primero
-        
+        # Intentar ordenar (con protección)
+        try:
+            items.Sort("[ReceivedTime]", True) 
+        except:
+            print("   [WARN] No se pudo ordenar por fecha. Continuando sin orden...")
+
         # Procesados en esta carpeta
         local_count = 0
         
@@ -152,21 +156,23 @@ def procesar_carpeta_recursiva(carpeta, lista_datos, ruta_actual, fecha_limite):
     except Exception as e:
         print(f"⚠️ Error carpeta {nombre_carpeta}: {e}")
 
-def generar_dataset_masivo():
-    print("--- 🚀 DATA MINING MASIVO (1 AÑO DE HISTORIA) ---")
-    print(f"📅 Fecha límite: {(datetime.datetime.now() - datetime.timedelta(days=DIAS_HISTORIAL)).date()}")
+def generar_dataset_masivo(dias=None):
+    if dias is None: dias = DIAS_HISTORIAL
+    
+    print("--- 🚀 DATA MINING MASIVO ---")
+    print(f"📅 Fecha límite: {(datetime.datetime.now() - datetime.timedelta(days=dias)).date()}")
     
     outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
     inbox = outlook.GetDefaultFolder(6) 
     
     # Calcular fecha de corte
-    fecha_limite = datetime.datetime.now() - datetime.timedelta(days=DIAS_HISTORIAL)
+    fecha_limite = datetime.datetime.now() - datetime.timedelta(days=dias)
     
     datos_totales = []
     procesar_carpeta_recursiva(inbox, datos_totales, "", fecha_limite)
     
     df = pd.DataFrame(datos_totales)
-    archivo = "dataset_masivo_1ano.csv"
+    archivo = "dataset_masivo.csv"
     df.to_csv(archivo, index=False, sep=SEPARADOR_CSV, encoding='utf-8-sig')
     
     print(f"\n✅ Dataset generado: {archivo}")

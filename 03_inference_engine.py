@@ -136,7 +136,9 @@ def ejecutar_vigilancia():
             elif prob >= UMBRAL_AMARILLO:
                 item.Categories = "IA Revisar"
                 item.Save()
-                accion = f"🟡 [REVISAR {prob:.0%}]"
+                accion = f"🔴 [REVISAR {prob:.0%}]"
+            else:
+                accion = f"🟡 [IGNORADO {prob:.0%}]"
             
             if accion:
                 print(f"{accion} {asunto[:40]}...")

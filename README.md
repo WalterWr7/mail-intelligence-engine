@@ -1,82 +1,104 @@
-\# 📧 Mail Intelligence Engine
+# 📧 Mail Intelligence Engine (V3)
 
+> **Sistema de Priorización Predictiva para Microsoft Outlook con Interfaz Gráfica.**
+> *Optimiza tu flujo de trabajo mediante Inteligencia Artificial Local.*
 
+![Python](https://img.shields.io/badge/Python-3.12+-blue?logo=python)
+![CatBoost](https://img.shields.io/badge/AI-CatBoost-orange)
+![Outlook](https://img.shields.io/badge/Integration-Win32COM-blue)
+![GUI](https://img.shields.io/badge/UI-CustomTkinter-green)
 
-> \*\*Sistema de Priorización Predictiva para Microsoft Outlook basado en Machine Learning (CatBoost + NLP).\*\*
+## 📖 Descripción
 
+**Mail Intelligence Engine** es una suite de productividad que transforma tu Outlook. Utilizando modelos de Machine Learning (CatBoost + NLP), analiza tus correos históricos para entender qué es importante *para ti*.
 
+El sistema clasifica automáticamente los correos entrantes aplicando **Categorías de Color** en Outlook (🔴 Urgente / 🟡 Revisar), permitiéndote enfocar tu atención donde realmente importa.
 
-!\[Python](https://img.shields.io/badge/Python-3.12%2B-blue?logo=python)
-
-!\[CatBoost](https://img.shields.io/badge/Model-CatBoost-orange)
-
-!\[Outlook](https://img.shields.io/badge/Integration-Win32COM-blue)
-
-
-
-\## 📖 Descripción
-
-
-
-\*\*Mail Intelligence Engine\*\* es un asistente virtual diseñado para optimizar el flujo de trabajo en entornos corporativos de alta demanda. A diferencia de las reglas estáticas de Outlook, este sistema utiliza \*\*Aprendizaje Supervisado\*\* para entender tu comportamiento histórico.
-
-
-
-El modelo analiza no solo quién envía el correo, sino el contexto semántico del asunto y tu rol en la conversación (To/CC), para predecir la probabilidad de que un correo requiera una acción inmediata.
-
-
-
-\### 🚀 Características Principales
-
-
-
-\* \*\*Enfoque de Alta Seguridad (High Recall):\*\* El modelo prioriza la sensibilidad (70% Recall) para asegurar que ningún correo crítico sea ignorado.
-
-\* \*\*Aprendizaje Híbrido:\*\* Combina procesamiento de lenguaje natural (TF-IDF en Asuntos) con metadatos estructurados (Dominios, Destinatarios).
-
-\* \*\*Integración No Destructiva:\*\* No mueve correos. Utiliza el sistema de \*\*Categorías de Color\*\* de Outlook (🔴 Urgente / 🟡 Revisar) para una clasificación visual fluida.
-
-\* \*\*Privacidad Total:\*\* Todo el procesamiento ocurre localmente en tu máquina. Ningún dato sale de tu ordenador.
-
-
+### 🚀 Novedades V3
+*   **Interfaz Gráfica Unificada:** Todo el poder del sistema en una sola ventana moderna (`app_master.py`).
+*   **Modo Ejecutable:** No requiere instalación de Python.
+*   **Dashboards:** Visualización de métricas y estadísticas de tu correo.
 
 ---
 
+## 📦 Instalación y Uso
 
+Tienes dos formas de usar el sistema:
 
-\## 🏗️ Arquitectura del Proyecto
+### Opción A: Ejecutable (Portable)
+*Recomendado para usuarios finales.*
 
+1.  Ve a la carpeta `dist\MailIntelligence_Folder`.
+2.  Ejecuta `MailIntelligence_Folder.exe`.
+3.  ¡Listo! No necesitas instalar nada más.
 
+> **Nota:** Existe una versión de archivo único (`MailIntelligence.exe`), pero la versión en carpeta (`_Folder`) es mucho más rápida al iniciar y evita falsos positivos de antivirus.
 
-El sistema opera en tres fases secuenciales:
+### Opción B: Código Fuente (Desarrolladores)
 
+1.  **Clonar repositorio:**
+    ```bash
+    git clone https://github.com/WalterWr7/mail-intelligence-engine.git
+    cd mail-intelligence-engine
+    ```
 
+2.  **Instalar dependencias:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-1\.  \*\*Minería de Datos (ETL):\*\* Extracción forense del historial de correos (últimos 365 días) vía interfaz MAPI.
+3.  **Ejecutar:**
+    ```bash
+    python app_master.py
+    ```
 
-2\.  \*\*Entrenamiento (Training):\*\* Generación del modelo predictivo usando \*\*CatBoost\*\* con balanceo de pesos automático.
+---
 
-3\.  \*\*Inferencia (Live):\*\* Un agente "centinela" que monitorea la bandeja de entrada en tiempo real.
+## 🛠️ Flujo de Trabajo
 
+La aplicación te guía paso a paso:
 
+1.  **Minería de Datos (Data Mining):** 
+    *   Extrae tu historial de Outlook (últimos 365 días por defecto).
+    *   Genera un dataset local (`dataset_masivo.csv`).
+
+2.  **Entrenamiento (Training):**
+    *   Entrena un modelo predictivo personalizado con tus datos.
+    *   Genera el "cerebro" (`cerebro_priorizacion.joblib`).
+
+3.  **Vigilancia (Monitoring):**
+    *   Activa el agente en tiempo real.
+    *   Clasifica correos nuevos según llegan a tu bandeja.
+
+---
+
+## 🏗️ Arquitectura Técnica
+
+El proyecto sigue una arquitectura modular dirigida por la UI:
 
 ```text
-
-mail\_intelligence/
-
+mail_intelligence/
 │
-
-├── 📜 01\_data\_extractor.py       # Extrae historial a CSV
-
-├── 📜 02\_model\_trainer.py        # Entrena el modelo y evalúa métricas
-
-├── 📜 03\_inference\_engine.py     # Agente de vigilancia en tiempo real
-
+├── 📜 app_master.py           # [MAIN] Interfaz Gráfica (GUI) y Orquestador
 │
+├── 🧠 Backend (Módulos)
+│   ├── 📜 01_data_extractor.py    # ETL: Extracción MAPI y limpieza
+│   ├── 📜 02_model_trainer.py     # ML: Entrenamiento CatBoost
+│   └── 📜 03_inference_engine.py  # Runtime: Vigilancia en tiempo real
+│
+├── 📁 dist/                   # Ejecutables generados (Compilados)
+│   └── 📁 MailIntelligence_Folder # Versión optimizada (OneDir)
+│
+└── 📄 requirements.txt        # Dependencias (pandas, catboost, ctk, pywin32)
+```
 
-├── 🧠 cerebro\_priorizacion.joblib # Modelo entrenado (Ignorado en git)
+## 🔒 Privacidad y Seguridad
 
-├── 📊 dataset\_masivo\_1ano.csv     # Datos históricos (Ignorado en git)
+*   **Procesamiento Local:** Ningún correo sale de tu computadora. Todo el análisis ocurre en tu CPU.
+*   **No Destructivo:** El sistema **nunca elimina ni mueve** correos. Solo añade etiquetas de color.
+*   **Código Abierto:** Puedes auditar cada línea de código.
 
-└── 📄 requirements.txt            # Dependencias
+---
 
+**Desarrollado por Walter Llana**
+*v3.0.0 - Edición Enterprise*

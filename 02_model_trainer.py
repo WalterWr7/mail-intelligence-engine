@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 
 # --- CONFIGURACIÓN ---
-ARCHIVO_DATASET = "dataset_masivo_1ano.csv"
+ARCHIVO_DATASET = "dataset_masivo.csv"
 ARCHIVO_MODELO = "cerebro_priorizacion.joblib" 
 
 # --- WRAPPER PARA CORREGIR ERROR DE SKLEARN 1.6 ---
