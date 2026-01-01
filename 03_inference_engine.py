@@ -89,66 +89,78 @@ def obtener_features(item):
 
     return email, dominio, en_to, en_cc, total
 
+def procesar_carpeta_recursiva(carpeta, clf, counter):
+    try:
+        # 1. Procesar correos de ESTA carpeta
+        items = carpeta.Items.Restrict("[UnRead] = True")
+        items.Sort("[ReceivedTime]", True)
+        
+        # print(f"� Revisando: {carpeta.Name} ({items.Count} pendientes)...")
+        
+        for item in items:
+            if item.Class != 43: continue
+            try:
+                email, dom, to, cc, tot = obtener_features(item)
+                asunto = limpiar_texto(item.Subject)
+                
+                # Crear DataFrame
+                df = pd.DataFrame([{
+                    'Asunto': asunto, 
+                    'Dominio': dom,
+                    'Estoy_En_To': to, 
+                    'Estoy_En_CC': cc, 
+                    'Total_Destinatarios': tot
+                }])
+                
+                prob = clf.predict_proba(df)[:, 1][0]
+                
+                accion = ""
+                if prob >= UMBRAL_ROJO:
+                    item.Categories = "IA Urgente"
+                    item.Save()
+                    accion = f"🔴 [URGENTE {prob:.0%}]"
+                elif prob >= UMBRAL_AMARILLO:
+                    item.Categories = "IA Revisar"
+                    item.Save()
+                    accion = f"🔴 [REVISAR {prob:.0%}]"
+                else:
+                    accion = f"🟡 [IGNORADO {prob:.0%}]"
+                
+                if accion:
+                    print(f"{accion} [{carpeta.Name}] {asunto[:30]}...")
+                counter[0] += 1
+                    
+            except Exception as e: 
+                pass
+        
+        # 2. Recursividad: Ir a las subcarpetas
+        for subfolder in carpeta.Folders:
+            procesar_carpeta_recursiva(subfolder, clf, counter)
+            
+    except Exception as e:
+        print(f"⚠️ Error leyendo carpeta {carpeta.Name}: {e}")
+
 def ejecutar_vigilancia():
-    print("--- 👁️ INICIANDO VIGILANCIA IA (CatBoost Engine) ---")
+    print("--- 👁️ INICIANDO VIGILANCIA IA UNIVERSAL (Inbox + Subcarpetas) ---")
     
     try:
-        # Ahora sí funcionará porque Python conoce la clase CatBoostWrapper
         clf = joblib.load(ARCHIVO_MODELO)
         print("✅ Cerebro cargado correctamente.")
     except Exception as e:
         print(f"❌ Error cargando modelo: {e}")
-        print("💡 Consejo: Verifica que el archivo .joblib esté en la misma carpeta.")
         return
 
     outlook_app = win32com.client.Dispatch("Outlook.Application")
     inicializar_categorias(outlook_app)
     
     inbox = outlook_app.GetNamespace("MAPI").GetDefaultFolder(6)
-    items = inbox.Items.Restrict("[UnRead] = True")
-    items.Sort("[ReceivedTime]", True)
     
-    print(f"📩 Analizando {items.Count} correos no leídos...")
+    print("🚀 Escaneando carpetas... (Esto puede tomar un momento)")
     
-    count = 0
-    for item in items:
-        if item.Class != 43: continue
-        try:
-            email, dom, to, cc, tot = obtener_features(item)
-            asunto = limpiar_texto(item.Subject)
-            
-            # Crear DataFrame con nombres de columnas exactos
-            df = pd.DataFrame([{
-                'Asunto': asunto, 
-                'Dominio': dom,
-                'Estoy_En_To': to, 
-                'Estoy_En_CC': cc, 
-                'Total_Destinatarios': tot
-            }])
-            
-            prob = clf.predict_proba(df)[:, 1][0]
-            
-            accion = ""
-            if prob >= UMBRAL_ROJO:
-                item.Categories = "IA Urgente"
-                item.Save()
-                accion = f"🔴 [URGENTE {prob:.0%}]"
-            elif prob >= UMBRAL_AMARILLO:
-                item.Categories = "IA Revisar"
-                item.Save()
-                accion = f"🔴 [REVISAR {prob:.0%}]"
-            else:
-                accion = f"🟡 [IGNORADO {prob:.0%}]"
-            
-            if accion:
-                print(f"{accion} {asunto[:40]}...")
-            count += 1
-                
-        except Exception as e: 
-            # print(f"Error en un item: {e}") 
-            pass
-
-    print(f"✅ Vigilancia terminada. {count} correos escaneados.")
+    contador_total = [0] # Referencia mutable
+    procesar_carpeta_recursiva(inbox, clf, contador_total)
+    
+    print(f"✅ Vigilancia terminada. {contador_total[0]} correos escaneados en total.")
 
 if __name__ == "__main__":
     ejecutar_vigilancia()
